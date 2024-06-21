@@ -1,0 +1,55 @@
+# Template for pkservers
+services:
+  pkserver-ffa:
+    container_name: ffa
+    image: docker.io/painkillergameclassic/pkserver:main
+    # platform: linux/amd64
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    environment:
+      PKS_CFG: "${PKS_CFG}"
+      PKS_LSCRIPTS: "PKPlus13.pak"
+    volumes:
+      - type: bind
+        source: ${HOME}/my_pkserver/${PKS_CFG}
+        target: /opt/pkserver/Bin/${PKS_CFG}
+      # - type: bind
+      #   source: ${HOME}/my_pkserver/${MAP1}
+      #   target: /opt/pkserver/Bin/${MAP1}
+    # command: ["+interface 192.168.0.106", "+private"]
+    deploy:
+      resources:
+        limits:
+          memory: 400M
+    tty: true
+    stdin_open: true
+    network_mode: "host"
+    restart: unless-stopped
+
+  pkserver-ctf:
+    container_name: ctf
+    image: docker.io/painkillergameclassic/pkserver:main
+    # platform: linux/amd64
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    environment:
+      PKS_CFG: "${PKS_CFG2}"
+      PKS_LSCRIPTS: "PKPlus13.pak"
+    volumes:
+      - type: bind
+        source: ${HOME}/my_pkserver/${PKS_CFG2}
+        target: /opt/pkserver/Bin/${PKS_CFG2}
+      # - type: bind
+      #   source: ${HOME}/my_pkserver/${MAP1}
+      #   target: /opt/pkserver/Bin/${MAP1}
+    # command: ["+interface 192.168.0.106", "+private"]
+    deploy:
+      resources:
+        limits:
+          memory: 400M
+    tty: true
+    stdin_open: true
+    network_mode: "host"
+    restart: unless-stopped
