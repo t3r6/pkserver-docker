@@ -202,6 +202,8 @@ podman run --rm --name ffa -itd -e PKS_CFG -e PKS_LSCRIPTS='PKPlus13.pak' --moun
 
 You can run multiple server instances based on the same image by giving them different names and passing different parameters and ports.
 
+> To change the port, go to `config.ini` and modify the `Cfg.ServerPort` line.
+
 Let's say I have 3 different config files with different ports on my host (FFA config, DUEL config, CTF config) and I'd like to bind them to 3 different containers based on the same image:
 
 > All configs should have 664 permissions.
