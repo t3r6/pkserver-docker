@@ -245,12 +245,12 @@ podman stop $(podman ps -a -q)
 podman rm $(podman ps -a -q)
 ```
 
-## Managing server logs
+## Managing server logs and stats
 
 Since this guide does not imply that you use Docker volumes, to manage `pkserver` logs you need to create a cron job that periodically copies LOG files from a container to your host. In this example, we copy LOG files from the container named 'ffa' to the `HOME` directory on the host:
 
 ```
-podman exec ffa bash -c 'tar -cf - /opt/pkserver/Bin/*.log' | tar --strip-components 3 -C ${HOME} -xvf -
+podman exec ffa bash -c 'tar -cf - /opt/pkserver/Bin/*.log /opt/pkserver/Bin/*.txt' | tar --strip-components 3 -C ${HOME} -xvf -
 ```
 
 ## Managing server resources
