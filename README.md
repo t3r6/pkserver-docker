@@ -39,12 +39,18 @@ All of the below commands are indicated for `podman` but you can run all of them
 
 ## Quick start
 
-> `hostname -I` is the command to show the IP addresses for the host. Please make sure that this command works on your OS and that you don't have multiple IPs before running the below command. Otherwise, replace `$(hostname -I)` with the IP address.
+> `hostname -I` is the command to show the IP addresses for the host. Please make sure that this command works on your OS and that you don't have multiple IPs before running the below command. Otherwise, replace `$(hostname -I)` with the IP address or use pass this variable to the Docker container `CFG_NETWORKINTERFACE`.
 
 1. Start a server with the name 'ffa' (this command will automatically pull the Docker image and start a container):
 
     ```
     podman run --rm --name ffa -itd --net=host docker.io/painkillergameclassic/pkserver:main +interface $(hostname -I)
+    ```
+
+    Example with the network interface variable:
+
+    ```
+    podman run --rm --name ffa -itd -e CFG_NETWORKINTERFACE="192.168.0.106" --net=host docker.io/painkillergameclassic/pkserver:main
     ```
 
 2. Check that the container with the pkserver is running:
@@ -77,11 +83,21 @@ All of the below commands are indicated for `podman` but you can run all of them
     podman container prune
     ```
 
+## Using variables
+
+You can pass variables to a container instead of modifying `config.ini`.
+Each variable corresponds to the `Cfg` parameter in `config.ini` and should start with uppercase `CFG_`.<br>
+For example, `Cfg.ServerPort` corresponds to `CFG_SERVERPORT`, `Cfg.NetworkInterface` to `CFG_NETWORKINTERFACE`.
+Let's start a PK++ 1.3 server on a `3456` port:
+```
+podman run --rm --name ffa -itd -e CFG_NETWORKINTERFACE="192.168.0.106" -e CFG_SERVERPORT="3456" -e PKS_LSCRIPTS='PKPlus13.pak' --net=host docker.io/painkillergameclassic/pkserver:main
+```
+
 ## Building
 
 1. Clone the repository
 
-2. Optional: put custom maps inside the `pkserver/Data/` folder, modify `pkserver/Bin/config.ini`.
+2. Optional: put custom maps inside the `pkserver/Data/` folder and modify `pkserver/Bin/config.ini`.
 
 3. Run the following command:
 
@@ -102,7 +118,7 @@ All of the below commands are indicated for `podman` but you can run all of them
 
 I didn't find a way to make the `pkserver` binary work in a Virtual Machine via the Docker bridge network driver so I suggest running it via the host Docker network driver. `hostname -I` is the command to show the IP addresses for the host. Please make sure that this command works on your OS and that you don't have multiple IPs before running the below command. Otherwise, replace `$(hostname -I)` with the IP address.
 
-> You don't need to use the `+interface` command if you have one network interface on your host or if you set `Cfg.NetworkInterface` directly in the `pkserver/Bin/config.ini` file before building a Docker image.
+> You don't need to use the `+interface` command if you have one network interface on your host or if you set `Cfg.NetworkInterface` directly in the `pkserver/Bin/config.ini` file before building a Docker image. Alternatively, you can pass the `CFG_NETWORKINTERFACE` variable directly to Docker container.
 
 1. Start a server with the name 'ffa':
 
@@ -124,7 +140,7 @@ I didn't find a way to make the `pkserver` binary work in a Virtual Machine via 
 
 ### Run a server with a custom config
 
-Docker containers are ephemeral. It means that when you restart a container, all the information will be lost and you start from scratch. Thus, you need to bind a file from the outside of the Docker container. The simplest way would be to use the [bind mounts](https://docs.docker.com/storage/bind-mounts/) Docker feature. As an alternative you can use Docker volumes but I found this method inconvenient for the Painkiller server management since you cannot insert data directly into a volume without copying it to a container.
+Docker containers are ephemeral. It means that when you restart a container, all the information will be lost and you start from scratch. If you are not going to use variables for a container, you need to bind a file from the outside to the Docker container. The simplest way would be to use the [bind mounts](https://docs.docker.com/storage/bind-mounts/) Docker feature. As an alternative you can use Docker volumes but I found this method inconvenient for the Painkiller server management since you cannot insert data directly into a volume without copying it to a container.
 
 1. Copy `./pkserver/Bin/config.ini` from this repository to your host, for example, to `${HOME}/my_pkserver/config.ini`.
 
@@ -144,6 +160,13 @@ Docker containers are ephemeral. It means that when you restart a container, all
     export PKS_CFG="conf11.ini"
     export PKS_CFG_SOURCE="${HOME}/my_pkserver/${PKS_CFG}"
     podman run --rm --name ffa -itd -e PKS_CFG --mount type=bind,source=${PKS_CFG_SOURCE},target=/opt/pkserver/Bin/${PKS_CFG} --net=host pkserver:v1 +interface $(hostname -I)
+    ```
+
+    Simplified way without hacks (just mount your file as `config.ini` to a container):
+
+    ```
+    export PKS_CFG_SOURCE="${HOME}/my_pkserver/conf11.ini"
+    podman run --rm --name ffa -itd -e PKS_CFG --mount type=bind,source=${PKS_CFG_SOURCE},target=/opt/pkserver/Bin/config.ini --net=host pkserver:v1 +interface $(hostname -I)
     ```
 
 ### Run a server with custom lscripts
@@ -202,7 +225,7 @@ podman run --rm --name ffa -itd -e PKS_CFG -e PKS_LSCRIPTS='PKPlus13.pak' --moun
 
 You can run multiple server instances based on the same image by giving them different names and passing different parameters and ports.
 
-> To change the port, go to `config.ini` and modify the `Cfg.ServerPort` line.
+> To change the port, go to `config.ini` and modify the `Cfg.ServerPort` line. Alternatively, you can set the `CFG_SERVERPORT` variable.
 
 Let's say I have 3 different config files with different ports on my host (FFA config, DUEL config, CTF config) and I'd like to bind them to 3 different containers based on the same image:
 
@@ -345,9 +368,21 @@ You can skip using this image. This is merely a wrapper around the `pkserver` pa
     podman run -it --entrypoint=bash ${container_name}
     ```
 
-3. To copy inside/outside containers use [docker cp](https://docs.docker.com/reference/cli/docker/container/cp/).
+3. Login to a container as a root:
 
-4. Clean your system from Docker packages:
+    ```
+    docker exec -it -u 0 ffa bash
+    ```
+
+    You can then install all the required tools in the container with:
+
+    ```
+    apt-get update && apt-get install
+    ```
+
+4. To copy inside/outside containers use [docker cp](https://docs.docker.com/reference/cli/docker/container/cp/).
+
+5. Clean your system from Docker packages:
 
     ```
     podman system prune -a

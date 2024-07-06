@@ -1,4 +1,10 @@
-# Template for pkservers
+# Templates for pkservers.
+# Pay attention to how the variables are set in the examples,
+# quotations and escaping are important.
+# Available gamemodes (mind the letter case):
+# Free For All, Voosh, The Light Bearer, People Can Fly, Team Deathmatch,
+# Capture The Flag, Last Man Standing, Duel, Clan Arena, Instagib, ICTF
+
 services:
   pkserver-ffa:
     container_name: ffa
@@ -8,16 +14,21 @@ services:
     #   context: .
     #   dockerfile: Dockerfile
     environment:
-      PKS_CFG: "${PKS_CFG}"
+      # PKS_CFG: "${PKS_CFG}"
       PKS_LSCRIPTS: "PKPlus13.pak"
-    volumes:
-      - type: bind
-        source: ${HOME}/my_pkserver/${PKS_CFG}
-        target: /opt/pkserver/Bin/${PKS_CFG}
-      # - type: bind
-      #   source: ${HOME}/my_pkserver/${MAP1}
-      #   target: /opt/pkserver/Data/${MAP1}
-    # command: ["+interface 192.168.0.106", "+private"]
+      CFG_SERVERNAME: "Painkiller FFA"
+      CFG_SERVERPORT: "3455"
+      CFG_SERVERMAPSFFA: "{\"DM_Factory\",\"DM_Trainstation\"}"
+      CFG_PROPLUS: "true"
+      # CFG_NETWORKINTERFACE: "192.168.0.106"
+    # volumes:
+    #   - type: bind
+    #     source: ${HOME}/my_pkserver/${PKS_CFG}
+    #     target: /opt/pkserver/Bin/${PKS_CFG}
+    #   - type: bind
+    #     source: ${HOME}/my_pkserver/${MAP1}
+    #     target: /opt/pkserver/Data/${MAP1}
+    command: ["+interface 192.168.0.106"]
     deploy:
       resources:
         limits:
@@ -35,15 +46,19 @@ services:
     #   context: .
     #   dockerfile: Dockerfile
     environment:
-      PKS_CFG: "${PKS_CFG2}"
+      # PKS_CFG: "${PKS_CFG2}"
       PKS_LSCRIPTS: "PKPlus12.pak"
-    volumes:
-      - type: bind
-        source: ${HOME}/my_pkserver/${PKS_CFG2}
-        target: /opt/pkserver/Bin/${PKS_CFG2}
-      # - type: bind
-      #   source: ${HOME}/my_pkserver/${MAP1}
-      #   target: /opt/pkserver/Data/${MAP1}
+      CFG_SERVERNAME: "Painkiller CTF"
+      CFG_GAMEMODE: "Capture The Flag"
+      CFG_SERVERPORT: "3456"
+      # CFG_NETWORKINTERFACE: "192.168.0.106"
+    # volumes:
+    #   - type: bind
+    #     source: ${HOME}/my_pkserver/${PKS_CFG2}
+    #     target: /opt/pkserver/Bin/${PKS_CFG2}
+    #   - type: bind
+    #     source: ${HOME}/my_pkserver/${MAP1}
+    #     target: /opt/pkserver/Data/${MAP1}
     # command: ["+interface 192.168.0.106", "+private"]
     deploy:
       resources:
