@@ -1,7 +1,15 @@
 # Templates for pkservers.
-# Pay attention to how the variables are set in the examples,
-# quotations and escaping are important.
-# Available gamemodes (mind the letter case):
+# Note that unlike PK++ 1.2, PK++ 1.3 is not backward compatible with the original Painkiller.
+# A client should run PK++ 1.3 to connect to the PK++ 1.3 server.
+# All server options can be adjusted according to your needs.
+# Uncomment what is necessary in the file.
+# Pay attention to how the variables are set in the examples.
+# Quotations and escaping are important, indentations are also important in YAML.
+# If you use the default Docker bridge network, the host and container ports should be identical.
+# You will also need to align the Cfg_ServerPort variable to match the ports.
+# All of these are required to avoid the issues with the NATNEG protocol.
+# Otherwise, use the Docker host network with the interface parameter.
+# Available gamemodes (note the letter case):
 # Free For All, Voosh, The Light Bearer, People Can Fly, Team Deathmatch,
 # Capture The Flag, Last Man Standing, Duel, Clan Arena, Instagib, ICTF
 
@@ -10,55 +18,153 @@ services:
     container_name: ffa
     image: docker.io/painkillergameclassic/pkserver:main
     # platform: linux/amd64
-    # build:
+    # build: # Uncomment if you want to build your own image.
     #   context: .
     #   dockerfile: Dockerfile
+    ports:
+      - "3455:3455/udp" # host_port:container_port
+      - "3578:3578/udp" # LAN Discovery
     environment:
-      # PKS_CFG: "${PKS_CFG}"
-      PKS_LSCRIPTS: "PKPlus13.pak"
-      CFG_SERVERNAME: "Painkiller FFA"
-      CFG_SERVERPORT: "3455"
-      CFG_SERVERMAPSFFA: "{\"DM_Factory\",\"DM_Trainstation\"}"
-      CFG_PROPLUS: "true"
-      # CFG_NETWORKINTERFACE: "192.168.0.106"
+      PKS_LSCRIPTS: "PKPlus12.pak" # Run PK++ 1.2 mod
+      Cfg_AllowForwardRJ: "false"
+      Cfg_BotSkill: "7"
+      Cfg_FallingDamage: "false"
+      Cfg_FragLimit: "25"
+      Cfg_LimitServerFPS: "true"
+      Cfg_MOTD: "Several frags a day keep the doctor away" # Message of the day
+      Cfg_NoWarmup: "true"
+      # Cfg_NetworkInterface: "192.168.0.106" # Host IP. This parameter is only required for the Docker "host" network mode.
+      Cfg_PowerupDrop: "true"
+      Cfg_ProPlus: "true" # PK++ feature to reduce stake damage, increase bronze armor straight, turn off telefrags.
+      # Cfg_RconPass: "myrconpassword"
+      Cfg_ServerFPS: "60"
+      Cfg_ServerMaps: "{\"DM_Illuminati\",\"DM_Cursed\",\"DM_Sacred\",\"DM_Factory\",\"DM_Trainstation\",\"DM_Fallen1\",\"DM_Unseen\",}"
+      Cfg_ServerMapsFFA: "{\"DM_Illuminati\",\"DM_Cursed\",\"DM_Sacred\",\"DM_Factory\",\"DM_Trainstation\",\"DM_Fallen1\",\"DM_Unseen\",}"
+      Cfg_ServerName: "Painkiller FFA Docker"
+      # Cfg_ServerPassword: "myserverpassword"
+      Cfg_WeaponsStay: "false"
     # volumes:
-    #   - type: bind
-    #     source: ${HOME}/my_pkserver/${PKS_CFG}
-    #     target: /opt/pkserver/Bin/${PKS_CFG}
-    #   - type: bind
+    #   - type: bind # Bind custom config from your host to the Docker container if you don't use the 'Cfg_' variables.
+    #     source: ${HOME}/my_pkserver/custom_ffa_config.ini
+    #     target: /opt/pkserver/Bin/config.ini
+    #   - type: bind # Bind custom maps from your host to the Docker container.
     #     source: ${HOME}/my_pkserver/${MAP1}
     #     target: /opt/pkserver/Data/${MAP1}
-    command: ["+interface 192.168.0.106"]
+      # - type: volume # Volumes are required if you want to save the container information on a host.
+      #   source: pk-data-ffa
+      #   target: /opt/pkserver
+    # command: ["+interface 192.168.0.106", "+private"] # "+interface" is only required for the "host" network mode and it's an alternative to the  Cfg_NetworkInterface variable.
     deploy:
       resources:
         limits:
-          memory: 400M
+          memory: 400M # The container will be stopped if there are memory leaks.
     tty: true
     stdin_open: true
-    network_mode: "host"
+    # network_mode: "host" # Use along with Cfg_NetworkInterface and Cfg_ServerPort if you have connectivity issues or NATNEG errors.
+    # restart: always # Set restart policy so that Docker restart the container after the host machine reboot or a failure.
+
+  pkserver-duel:
+    container_name: duel
+    image: docker.io/painkillergameclassic/pkserver:main
+    ports:
+      - "3456:3456/udp"
+      - "3579:3579/udp"
+    environment:
+      PKS_LSCRIPTS: "PKPlus13.pak" # Run PK++ 1.3 mod
+      Cfg_AllowForwardRJ: "false"
+      Cfg_BotMinPlayers: "0"
+      Cfg_GameMode: "Duel"
+      Cfg_LimitServerFPS: "true"
+      Cfg_MaxPlayers: "2"
+      Cfg_MaxSpectators: "3"
+      Cfg_MOTD: "Good Luck;Have Fun!"
+      Cfg_NetcodeServerFramerate: "30"
+      # Cfg_NetworkInterface: "192.168.0.106"
+      Cfg_Powerups: "false"
+      Cfg_ProPlus: "true"
+      # Cfg_RconPass: "myrconpassword"
+      # Cfg_RefPass: "myrefereepassword"
+      Cfg_ServerFPS: "60"
+      Cfg_ServerMaps: "{\"DM_Sacred\",\"DM_Psycho\",\"DM_Absinthe\",\"DM_Ballistic\",\"DM_5quid01\",\"DM_Fallen2\",}"
+      Cfg_ServerMapsDUE: "{\"DM_Sacred\",\"DM_Psycho\",\"DM_Absinthe\",\"DM_Ballistic\",\"DM_5quid01\",\"DM_Fallen2\",}"
+      Cfg_ServerName: "Painkiller Duel Docker"
+      # Cfg_ServerPassword: "myserverpassword"
+      Cfg_ServerPort: "3456" # This parameter is required since the Docker host is bound to the 3456 game port.
+      Cfg_TimeLimit: "10"
+      Cfg_UserAllowBrightskins: "false" # Cfg_User variables to configure the user voting options.
+      Cfg_UserAllowBunnyhopping: "false"
+      Cfg_UserAllowForwardRJ: "false"
+      Cfg_UserCaptureLimit: "false"
+      Cfg_UserFragLimit: "false"
+      Cfg_UserGameMode: "false"
+      Cfg_UserLMSLives: "false"
+      Cfg_UserMaxPlayers: "false"
+      Cfg_UserMaxSpectators: "false"
+      Cfg_UserPowerupDrop: "false"
+      Cfg_UserPowerups: "false"
+      Cfg_UserStartupWeapon: "false"
+      Cfg_UserTeamDamage: "false"
+      Cfg_UserTimeLimit: "false"
+      Cfg_UserWeaponRespawnTime: "false"
+      Cfg_UserWeaponsStay: "false"
+      Cfg_WeaponRespawnTime: "15"
+      Cfg_WeaponsStay: "false"
+    # volumes:
+    #   - type: bind
+    #     source: ${HOME}/my_pkserver/custom_duel_config.ini
+    #     target: /opt/pkserver/Bin/config.ini
+    #   - type: bind
+    #     source: ${HOME}/my_pkserver/${MAP1}
+    #     target: /opt/pkserver/Data/${MAP1}
+      # - type: volume
+      #   source: pk-data-duel
+      #   target: /opt/pkserver
+    # command: ["+interface 192.168.0.106", "+private"] # "+private" makes your server ivisible on OpenSpy
+    deploy:
+      resources:
+        limits:
+          memory: 250M
+    tty: true
+    stdin_open: true
+    # network_mode: "host"
     # restart: always
 
   pkserver-ctf:
     container_name: ctf
     image: docker.io/painkillergameclassic/pkserver:main
-    # platform: linux/amd64
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
+    ports:
+      - "3457:3457/udp"
+      - "3580:3580/udp"
     environment:
-      # PKS_CFG: "${PKS_CFG2}"
-      PKS_LSCRIPTS: "PKPlus12.pak"
-      CFG_SERVERNAME: "Painkiller CTF"
-      CFG_GAMEMODE: "Capture The Flag"
-      CFG_SERVERPORT: "3456"
-      # CFG_NETWORKINTERFACE: "192.168.0.106"
+      PKS_LSCRIPTS: "PKPlus12.pak" # Run PK++ 1.2 mod
+      Cfg_BotMinPlayers: "4"
+      Cfg_CaptureLimit: "5"
+      Cfg_GameMode: "Capture The Flag"
+      Cfg_LimitServerFPS: "true"
+      Cfg_MaxPlayers: "8"
+      Cfg_MaxSpectators: "6"
+      # Cfg_NetworkInterface: "192.168.0.106"
+      Cfg_NoWarmup: "true"
+      Cfg_PowerupDrop: "true"
+      Cfg_ProPlus: "true"
+      # Cfg_RconPass: "myrconpassword"
+      Cfg_RocketFix: "false"
+      Cfg_ServerFPS: "60"
+      Cfg_ServerMaps: "{\"CTF_Forbidden\",\"CTF_Chaos\",\"CTF_Trainstation\",}"
+      Cfg_ServerPort: "3457"
+      Cfg_ServerName: "Painkiller CTF Docker"
+      Cfg_StopMatchOnTeamQuit: "false"
+      # Cfg_TeamDamage: "true"
     # volumes:
     #   - type: bind
-    #     source: ${HOME}/my_pkserver/${PKS_CFG2}
-    #     target: /opt/pkserver/Bin/${PKS_CFG2}
+    #     source: ${HOME}/my_pkserver/custom_ctf_config.ini
+    #     target: /opt/pkserver/Bin/config.ini
     #   - type: bind
     #     source: ${HOME}/my_pkserver/${MAP1}
     #     target: /opt/pkserver/Data/${MAP1}
+      # - type: volume
+      #   source: pk-data-ctf
+      #   target: /opt/pkserver
     # command: ["+interface 192.168.0.106", "+private"]
     deploy:
       resources:
@@ -66,5 +172,13 @@ services:
           memory: 400M
     tty: true
     stdin_open: true
-    network_mode: "host"
+    # network_mode: "host"
     # restart: always
+
+# volumes: # Named volumes for each of the service. You can also configure one shared `./pkserver/Data` volume for multiple services.
+#   pk-data-ffa:
+#     name: pk-data-ffa
+#   pk-data-duel:
+#     name: pk-data-duel
+#   pk-data-ctf:
+#     name: pk-data-ctf

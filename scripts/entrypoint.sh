@@ -23,10 +23,11 @@ hack_cfg()
 
 modify_cfg()
 {
-    awk 'BEGIN{for(v in ENVIRON) if(v ~ /^CFG_/) print v}' | while read -r cfg_env
+    awk 'BEGIN{for(v in ENVIRON) if(tolower(v) ~ /^cfg_/) print v}' | while read -r cfg_env
         do
-            prefix="CFG_"
-            cfg_parameter="${cfg_env#"$prefix"}"
+            prefix="cfg_"
+            cfg_env_lower=$(echo "$cfg_env" | tr '[:upper:]' '[:lower:]')
+            cfg_parameter="${cfg_env_lower#"$prefix"}"
             cfg_env_val="$(eval echo \$${cfg_env})"
             if grep -iq "${cfg_parameter}.*{" "${PKS_CFG_DEFAULT_PATH}"
             then
@@ -34,12 +35,12 @@ modify_cfg()
                 awk -v param="Cfg.${cfg_parameter}" -v env="${cfg_env_val}" '
                     BEGIN{
                         FS="=";
-                        OFS=" = "
+                        OFS=" ="
                     }
                     {
                         gsub(/^[ \t]+|[ \t]+$/, "", $1);
                         if(tolower($1) == tolower(param)) {
-                            $2 = "" env ""
+                            $2 = " " env ""
                         }
                     }
                     1' "${PKS_CFG_DEFAULT_PATH}" > "${PKS_CONFIG_TEMP}"

@@ -1,5 +1,4 @@
-# Debian has all the necessary 32-bit packages in repositories and
-# good support for multi-platform builds.
+# Debian has all the necessary 32-bit packages in repositories and good support for multi-platform builds.
 FROM debian:12
 
 ARG PKS_LSCRIPTS
@@ -31,7 +30,6 @@ WORKDIR ${PKS_DIR}/
 
 USER ${PKS_USER}
 
-ENTRYPOINT ["entrypoint.sh"]
+EXPOSE 3455/udp 3578/udp
 
-# The default Painkiller server port is 3455
-# We do not expose any ports because there is no inter-container communication
+ENTRYPOINT ["entrypoint.sh"]
