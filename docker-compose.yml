@@ -28,20 +28,24 @@ services:
       PKS_LSCRIPTS: "PKPlus12.pak" # Run PK++ 1.2 mod
       Cfg_AllowForwardRJ: "false"
       Cfg_BotSkill: "7"
-      Cfg_FallingDamage: "false"
-      Cfg_FragLimit: "25"
+      Cfg_FallingDamage: "false" # PK++ feature
+      Cfg_FragLimit: "50"
       Cfg_LimitServerFPS: "true"
       Cfg_MOTD: "Several frags a day keep the doctor away" # Message of the day
-      Cfg_NoWarmup: "true"
+      Cfg_MaxPlayers: "10"
       # Cfg_NetworkInterface: "192.168.0.106" # Host IP. This parameter is only required for the Docker "host" network mode.
-      Cfg_PowerupDrop: "true"
+      Cfg_Overtime: "0" # PK ++ feature. Set to 0 when used with Cfg_FragLimit in FFA.
+      # Cfg_PowerupDrop: "true" # This option is bugged in PK++
       Cfg_ProPlus: "true" # PK++ feature to reduce stake damage, increase bronze armor straight, turn off telefrags.
       # Cfg_RconPass: "myrconpassword"
-      Cfg_ServerFPS: "60"
+      Cfg_ServerFPS: "60" # Havok physics FPS. Set between 30 and 60. The maximum is 60 FPS and it's the smoothest for online gaming.
       Cfg_ServerMaps: "{\"DM_Illuminati\",\"DM_Cursed\",\"DM_Sacred\",\"DM_Factory\",\"DM_Trainstation\",\"DM_Fallen1\",\"DM_Unseen\",}"
       Cfg_ServerMapsFFA: "{\"DM_Illuminati\",\"DM_Cursed\",\"DM_Sacred\",\"DM_Factory\",\"DM_Trainstation\",\"DM_Fallen1\",\"DM_Unseen\",}"
       Cfg_ServerName: "Painkiller FFA Docker"
       # Cfg_ServerPassword: "myserverpassword"
+      Cfg_TimeLimit: "10"
+      Cfg_WarmUpTime: "10" # This option is only for FFA, Voosh, and TLB gamemodes that do not have a real Warmup.
+      Cfg_WeaponRespawnTime: "15"
       Cfg_WeaponsStay: "false"
     # volumes:
     #   - type: bind # Bind custom config from your host to the Docker container if you don't use the 'Cfg_' variables.
@@ -61,7 +65,7 @@ services:
     tty: true
     stdin_open: true
     # network_mode: "host" # Use along with Cfg_NetworkInterface and Cfg_ServerPort if you have connectivity issues or NATNEG errors.
-    # restart: always # Set restart policy so that Docker restart the container after the host machine reboot or a failure.
+    # restart: always # Set restart policy so that Docker restarts the container after the host machine reboot or a failure.
 
   pkserver-duel:
     container_name: duel
@@ -73,15 +77,19 @@ services:
       PKS_LSCRIPTS: "PKPlus13.pak" # Run PK++ 1.3 mod
       Cfg_AllowForwardRJ: "false"
       Cfg_BotMinPlayers: "0"
+      # Cfg_DuelQueue: "false" # PK++ feature
       Cfg_GameMode: "Duel"
       Cfg_LimitServerFPS: "true"
       Cfg_MaxPlayers: "2"
       Cfg_MaxSpectators: "3"
+      # Cfg_NoWarmup: "true" # Disable Warmup
       Cfg_MOTD: "Good Luck;Have Fun!"
       Cfg_NetcodeServerFramerate: "30"
       # Cfg_NetworkInterface: "192.168.0.106"
+      # Cfg_Overtime: "3"
       Cfg_Powerups: "false"
       Cfg_ProPlus: "true"
+      # Cfg_PureScripts: "true" # Validate client scripts
       # Cfg_RconPass: "myrconpassword"
       # Cfg_RefPass: "myrefereepassword"
       Cfg_ServerFPS: "60"
@@ -107,6 +115,7 @@ services:
       Cfg_UserTimeLimit: "false"
       Cfg_UserWeaponRespawnTime: "false"
       Cfg_UserWeaponsStay: "false"
+      # Cfg_WarmupDamage: "false"
       Cfg_WeaponRespawnTime: "15"
       Cfg_WeaponsStay: "false"
     # volumes:
@@ -145,7 +154,7 @@ services:
       Cfg_MaxSpectators: "6"
       # Cfg_NetworkInterface: "192.168.0.106"
       Cfg_NoWarmup: "true"
-      Cfg_PowerupDrop: "true"
+      # Cfg_PowerupDrop: "true" # This option is bugged in PK++
       Cfg_ProPlus: "true"
       # Cfg_RconPass: "myrconpassword"
       Cfg_RocketFix: "false"
