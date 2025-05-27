@@ -9,13 +9,27 @@
 # You will also need to align the Cfg_ServerPort variable to match the ports.
 # All of these are required to avoid the issues with the NATNEG protocol.
 # Otherwise, use the Docker host network with the interface parameter.
-# Available gamemodes (note the letter case):
-# Free For All, Voosh, The Light Bearer, People Can Fly, Team Deathmatch,
-# Capture The Flag, Last Man Standing, Duel, Clan Arena, Instagib, ICTF
+# Available gamemodes (mind the letter case):
+# For original Painkiller and PK++ 1.2:
+# Free For All (by default), Voosh, The Light Bearer, People Can Fly, Team Deathmatch, Capture The Flag, Last Man Standing, Duel
+# Additional gamemodes supported by PK++ 1.3 server:
+# Clan Arena, Instagib, ICTF
+# Bugs:
+# Painkiller server has bugs regarding setting ServerMaps.
+# You always need to duplicate map list in both Cfg_ServerMaps and Cfg_ServerMaps<Gamemode> (like in Cfg_ServerMapsCTF)
+# to avoid unexpected map rotation results.
+# PowerupDrop is bugged in PK++, do not use this parameter with the PK++ mod.
+# Overtime is a PK++ feature and recommended for Duels only. Set it to Cfg_Overtime: "0" for every other mode.
+# StopMatchOnTeamQuit is bugged and recommended with Cfg_StopMatchOnTeamQuit: "false" in team games.
+# ProPlus PK++ feature should be always turned off on PCF servers since it breaks the PCF gamemode mechanics.
+# FallingDamage is a PK++ feature and is turned on by default (you receive falling damange by default).
+# However, FallingDamage is overridden by ProPlus and they do not work together.
+# ProPlus has FallingDamage false by default and always overrides this FallingDamage variable.
+# You cannot configure FallingDamage with ProPlus true.
 
 services:
   pkserver-ffa:
-    container_name: ffa
+    container_name: pk_ffa
     image: docker.io/painkillergameclassic/pkserver:main
     # platform: linux/amd64
     # build: # Uncomment if you want to build your own image.
@@ -25,11 +39,12 @@ services:
       - "3455:3455/udp" # host_port:container_port
       - "3578:3578/udp" # LAN Discovery
     environment:
-      PKS_LSCRIPTS: "PKPlus12.pak" # Run PK++ 1.2 mod
+      PKS_LSCRIPTS: "PKPlus12.pak" # Run PK++ 1.2 mod; alternatively, you can run PK++1.3 PKPlus13.pak (not recommended for compatibility)
       Cfg_AllowForwardRJ: "false"
+      Cfg_BotMinPlayers: "0" # Set the bot quantity if needed
       Cfg_BotSkill: "7"
-      Cfg_FallingDamage: "false" # PK++ feature
-      Cfg_FragLimit: "50"
+      Cfg_FallingDamage: "false" # PK++ feature. ProPlus overrides it and it's always false when ProPlus true.
+      Cfg_FragLimit: "60"
       Cfg_LimitServerFPS: "true"
       Cfg_MOTD: "Several frags a day keep the doctor away" # Message of the day
       Cfg_MaxPlayers: "10"
@@ -38,15 +53,23 @@ services:
       # Cfg_PowerupDrop: "true" # This option is bugged in PK++
       Cfg_ProPlus: "true" # PK++ feature to reduce stake damage, increase bronze armor straight, turn off telefrags.
       # Cfg_RconPass: "myrconpassword"
-      Cfg_ServerFPS: "60" # Havok physics FPS. Set between 30 and 60. The maximum is 60 FPS and it's the smoothest for online gaming.
+      # Cfg_RocketFix: "false" # Turn off PK++ rocket fix to enable rocket jump speed boosts
+      Cfg_ServerFPS: "60" # Havok physics FPS. Set between 30 and 120. The maximum is 120 FPS. Recommended is 60 FPS.
       Cfg_ServerMaps: "{\"DM_Illuminati\",\"DM_Cursed\",\"DM_Sacred\",\"DM_Factory\",\"DM_Trainstation\",\"DM_Fallen1\",\"DM_Unseen\",}"
       Cfg_ServerMapsFFA: "{\"DM_Illuminati\",\"DM_Cursed\",\"DM_Sacred\",\"DM_Factory\",\"DM_Trainstation\",\"DM_Fallen1\",\"DM_Unseen\",}"
       Cfg_ServerName: "Painkiller FFA Docker"
       # Cfg_ServerPassword: "myserverpassword"
+      # Cfg_ServerPort: "3455" # 3455 is the default port. Required for docker port mapping.
       Cfg_TimeLimit: "10"
       Cfg_WarmUpTime: "10" # This option is only for FFA, Voosh, and TLB gamemodes that do not have a real Warmup.
       Cfg_WeaponRespawnTime: "15"
       Cfg_WeaponsStay: "false"
+      # Cfg_UserAllowBunnyhopping: "false" # Disable user voting options
+      # Cfg_UserGameMode: "false"
+      # Cfg_UserMaxPlayers: "false"
+      # Cfg_UserMaxSpectators: "false"
+      # Cfg_UserPowerupDrop: "false"
+      # Cfg_UserStartupWeapon: "false"
     # volumes:
     #   - type: bind # Bind custom config from your host to the Docker container if you don't use the 'Cfg_' variables.
     #     source: ${HOME}/my_pkserver/custom_ffa_config.ini
@@ -68,13 +91,13 @@ services:
     # restart: always # Set restart policy so that Docker restarts the container after the host machine reboot or a failure.
 
   pkserver-duel:
-    container_name: duel
+    container_name: pk_duel
     image: docker.io/painkillergameclassic/pkserver:main
     ports:
       - "3456:3456/udp"
       - "3579:3579/udp"
     environment:
-      PKS_LSCRIPTS: "PKPlus13.pak" # Run PK++ 1.3 mod
+      PKS_LSCRIPTS: "PKPlus12.pak" # Run PK++ 1.2 mod
       Cfg_AllowForwardRJ: "false"
       Cfg_BotMinPlayers: "0"
       # Cfg_DuelQueue: "false" # PK++ feature
@@ -84,7 +107,6 @@ services:
       Cfg_MaxSpectators: "3"
       # Cfg_NoWarmup: "true" # Disable Warmup
       Cfg_MOTD: "Good Luck;Have Fun!"
-      Cfg_NetcodeServerFramerate: "30"
       # Cfg_NetworkInterface: "192.168.0.106"
       # Cfg_Overtime: "3"
       Cfg_Powerups: "false"
@@ -97,9 +119,9 @@ services:
       Cfg_ServerMapsDUE: "{\"DM_Sacred\",\"DM_Psycho\",\"DM_Absinthe\",\"DM_Ballistic\",\"DM_5quid01\",\"DM_Fallen2\",}"
       Cfg_ServerName: "Painkiller Duel Docker"
       # Cfg_ServerPassword: "myserverpassword"
-      Cfg_ServerPort: "3456" # This parameter is required since the Docker host is bound to the 3456 game port.
+      Cfg_ServerPort: "3456" # This parameter should match the Docker host since it's bound to the 3456 game port.
       Cfg_TimeLimit: "10"
-      Cfg_UserAllowBrightskins: "false" # Cfg_User variables to configure the user voting options.
+      Cfg_UserAllowBrightskins: "false" # Cfg_User variables to configure and disable the user voting options.
       Cfg_UserAllowBunnyhopping: "false"
       Cfg_UserAllowForwardRJ: "false"
       Cfg_UserCaptureLimit: "false"
@@ -139,31 +161,35 @@ services:
     # restart: always
 
   pkserver-ctf:
-    container_name: ctf
+    container_name: pk_ctf
     image: docker.io/painkillergameclassic/pkserver:main
     ports:
       - "3457:3457/udp"
       - "3580:3580/udp"
     environment:
       PKS_LSCRIPTS: "PKPlus12.pak" # Run PK++ 1.2 mod
-      Cfg_BotMinPlayers: "4"
-      Cfg_CaptureLimit: "5"
+      Cfg_BotMinPlayers: "2"
+      Cfg_CaptureLimit: "15"
       Cfg_GameMode: "Capture The Flag"
       Cfg_LimitServerFPS: "true"
       Cfg_MaxPlayers: "8"
       Cfg_MaxSpectators: "6"
       # Cfg_NetworkInterface: "192.168.0.106"
-      Cfg_NoWarmup: "true"
+      # Cfg_NoWarmup: "true" # Disable Warmup
+      Cfg_Overtime: "0" # PK ++ feature. It's mostly for duels. Recommended "0" for everyting else or the match would continue forever.
       # Cfg_PowerupDrop: "true" # This option is bugged in PK++
       Cfg_ProPlus: "true"
       # Cfg_RconPass: "myrconpassword"
-      Cfg_RocketFix: "false"
+      Cfg_RocketFix: "false" # Turn off PK++ rocket fix to enable rocket jump speed boosts
       Cfg_ServerFPS: "60"
       Cfg_ServerMaps: "{\"CTF_Forbidden\",\"CTF_Chaos\",\"CTF_Trainstation\",}"
-      Cfg_ServerPort: "3457"
+      Cfg_ServerMapsCTF: "{\"CTF_Forbidden\",\"CTF_Chaos\",\"CTF_Trainstation\",}"
       Cfg_ServerName: "Painkiller CTF Docker"
-      Cfg_StopMatchOnTeamQuit: "false"
+      Cfg_ServerPort: "3457"
+      # Cfg_ServerPassword: "myserverpassword"
+      Cfg_StopMatchOnTeamQuit: "false" # This option is recommended as false bacause it's bugged.
       # Cfg_TeamDamage: "true"
+      Cfg_TimeLimit: "10"
     # volumes:
     #   - type: bind
     #     source: ${HOME}/my_pkserver/custom_ctf_config.ini
@@ -184,6 +210,53 @@ services:
     # network_mode: "host"
     # restart: always
 
+  pkserver-pcf:
+    container_name: pk_pcf
+    image: docker.io/painkillergameclassic/pkserver:main
+    ports:
+      - "3458:3458/udp"
+      - "3581:3581/udp"
+    environment:
+      PKS_LSCRIPTS: "PKPlus12.pak" # Run PK++ 1.2 mod
+      Cfg_BotMinPlayers: "0" # Set the bot quantity if needed
+      Cfg_GameMode: "People Can Fly"
+      Cfg_LimitServerFPS: "true"
+      Cfg_MaxPlayers: "8"
+      Cfg_MaxSpectators: "6"
+      # Cfg_NetworkInterface: "192.168.0.106"
+      # Cfg_NoWarmup: "true" # Disable Warmup
+      Cfg_Overtime: "0" # PK ++ feature. It's mostly for duels. Recommended "0" for everyting else or the match would continue forever.
+      # Cfg_PowerupDrop: "true" # This option is bugged in PK++
+      Cfg_ProPlus: "false" # PK++ Proplus feature breaks the PCF mechanics so should be turned off.
+      # Cfg_RconPass: "myrconpassword"
+      Cfg_RocketFix: "true" # If you use PK++, the PCF server should have RocketFix true and ProPlus false not to break the air control PCF mechanics.
+      Cfg_ServerFPS: "60"
+      Cfg_ServerMaps: "{\"DMPCF_Tower\",\"DMPCF_Warehouse\",}"
+      Cfg_ServerMapsPCF: "{\"DMPCF_Tower\",\"DMPCF_Warehouse\",}"
+      Cfg_ServerName: "Painkiller PCF Docker"
+      Cfg_ServerPort: "3458"
+      # Cfg_ServerPassword: "myserverpassword"
+      Cfg_TimeLimit: "6"
+    # volumes:
+    #   - type: bind
+    #     source: ${HOME}/my_pkserver/custom_pcf_config.ini
+    #     target: /opt/pkserver/Bin/config.ini
+    #   - type: bind
+    #     source: ${HOME}/my_pkserver/${MAP1}
+    #     target: /opt/pkserver/Data/${MAP1}
+      # - type: volume
+      #   source: pk-data-pcf
+      #   target: /opt/pkserver
+    # command: ["+interface 192.168.0.106", "+private"]
+    deploy:
+      resources:
+        limits:
+          memory: 400M
+    tty: true
+    stdin_open: true
+    # network_mode: "host"
+    # restart: always
+
 # volumes: # Named volumes for each of the service. You can also configure one shared `./pkserver/Data` volume for multiple services.
 #   pk-data-ffa:
 #     name: pk-data-ffa
@@ -191,3 +264,5 @@ services:
 #     name: pk-data-duel
 #   pk-data-ctf:
 #     name: pk-data-ctf
+#   pk-data-pcf:
+#     name: pk-data-pcf
