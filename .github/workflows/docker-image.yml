@@ -1,9 +1,12 @@
 name: Docker Image CI
 
 on:
-   workflow_dispatch:
-   schedule:
-     - cron: "0 0 1 */6 *"
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 1 */6 *"
 
 jobs:
   docker:
@@ -20,12 +23,10 @@ jobs:
             painkillergameclassic/pkserver
             ghcr.io/t3r6/pkserver
           tags: |
-            type=schedule
+            type=schedule,pattern={{date 'YYYYMMDD'}}
             type=ref,event=branch
-            type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
             type=sha  
 
       - name: Set up QEMU
