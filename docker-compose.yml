@@ -14,7 +14,11 @@
 # Free For All (by default), Voosh, The Light Bearer, People Can Fly, Team Deathmatch, Capture The Flag, Last Man Standing, Duel
 # Additional gamemodes supported by PK++ 1.3 server:
 # Clan Arena, Instagib, ICTF
+# Features:
+# The updated pkserver binary can accept the following options which override the config.ini environment parameters or accept custom config.ini and mod packs.
+# Example (mind the order of options): ["+interface 192.168.0.106", "+private", "+port 3455", "+map DM_Sacred", "-cfg conf12.ini", "-lscripts PKPlus12.pak"]
 # Bugs:
+# Cfg.PublicServer parameter does not work though you can use the "+private" command line instead to make your server private.
 # Painkiller server has bugs regarding setting ServerMaps.
 # You always need to duplicate map list in both Cfg_ServerMaps and Cfg_ServerMaps<Gamemode> (like in Cfg_ServerMapsCTF)
 # to avoid unexpected map rotation results.
@@ -60,6 +64,7 @@ services:
       Cfg_ServerName: "Painkiller FFA Docker"
       # Cfg_ServerPassword: "myserverpassword"
       # Cfg_ServerPort: "3455" # 3455 is the default port. Required for docker port mapping.
+      Cfg_StopMatchOnTeamQuit: "false" # This option is desired if you decide to switch to a team mode on the server.
       Cfg_TimeLimit: "10"
       Cfg_WarmUpTime: "10" # This option is only for FFA, Voosh, and TLB gamemodes that do not have a real Warmup.
       Cfg_WeaponRespawnTime: "15"
@@ -80,7 +85,7 @@ services:
       # - type: volume # Volumes are required if you want to save the container information on a host.
       #   source: pk-data-ffa
       #   target: /opt/pkserver
-    # command: ["+interface 192.168.0.106", "+private"] # "+interface" is only required for the "host" network mode and it's an alternative to the  Cfg_NetworkInterface variable.
+    # command: ["+interface 192.168.0.106", "+private", "+port 3455", "-cfg conf12.ini", "-lscripts PKPlus12.pak"] # "+interface" is only required for the "host" network mode and it's an alternative to the  Cfg_NetworkInterface variable.
     deploy:
       resources:
         limits:
@@ -120,6 +125,7 @@ services:
       Cfg_ServerName: "Painkiller Duel Docker"
       # Cfg_ServerPassword: "myserverpassword"
       Cfg_ServerPort: "3456" # This parameter should match the Docker host since it's bound to the 3456 game port.
+      Cfg_StopMatchOnTeamQuit: "false" # This option is desired if you decide to switch to a team mode on the server.
       Cfg_TimeLimit: "10"
       Cfg_UserAllowBrightskins: "false" # Cfg_User variables to configure and disable the user voting options.
       Cfg_UserAllowBunnyhopping: "false"
@@ -150,7 +156,7 @@ services:
       # - type: volume
       #   source: pk-data-duel
       #   target: /opt/pkserver
-    # command: ["+interface 192.168.0.106", "+private"] # "+private" makes your server ivisible on OpenSpy
+    # command: ["+interface 192.168.0.106", "+private", "+port 3456", "-cfg conf12.ini", "-lscripts PKPlus12.pak"]  # "+private" makes your server ivisible on OpenSpy
     deploy:
       resources:
         limits:
@@ -200,7 +206,7 @@ services:
       # - type: volume
       #   source: pk-data-ctf
       #   target: /opt/pkserver
-    # command: ["+interface 192.168.0.106", "+private"]
+    # command: ["+interface 192.168.0.106", "+private", "+port 3457", "-cfg conf12.ini", "-lscripts PKPlus12.pak"]
     deploy:
       resources:
         limits:
@@ -235,6 +241,7 @@ services:
       Cfg_ServerMapsPCF: "{\"DMPCF_Tower\",\"DMPCF_Warehouse\",}"
       Cfg_ServerName: "Painkiller PCF Docker"
       Cfg_ServerPort: "3458"
+      Cfg_StopMatchOnTeamQuit: "false" # This option is desired if you decide to switch to a team mode on the server.
       # Cfg_ServerPassword: "myserverpassword"
       Cfg_TimeLimit: "6"
     # volumes:
@@ -247,7 +254,7 @@ services:
       # - type: volume
       #   source: pk-data-pcf
       #   target: /opt/pkserver
-    # command: ["+interface 192.168.0.106", "+private"]
+    # command: ["+interface 192.168.0.106", "+private", "+port 3458", "-cfg conf12.ini", "-lscripts PKPlus12.pak"] 
     deploy:
       resources:
         limits:

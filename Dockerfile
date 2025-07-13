@@ -32,11 +32,12 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY --chmod=765 scripts/* /usr/local/bin/
+COPY --chmod=755 scripts/* /usr/local/bin/
 
 COPY pkserver/ ${PKS_DIR}/
 
-RUN chown -R ${PKS_USER}:${PKS_USER} ${PKS_DIR}/
+RUN chown -R ${PKS_USER}:${PKS_USER} ${PKS_DIR}/ && \
+    chmod 755 ${PKS_DIR}/Bin/${PKS_BINARY}
 
 WORKDIR ${PKS_DIR}/
 

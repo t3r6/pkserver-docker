@@ -24,7 +24,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY --chmod=765 scripts/* /usr/local/bin/
+COPY --chmod=755 scripts/* /usr/local/bin/
 
 WORKDIR ${PKS_DIR}/
 
