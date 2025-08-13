@@ -1,5 +1,5 @@
 # Debian has all the necessary 32-bit packages in repositories and good support for multi-platform builds.
-FROM debian:12
+FROM debian:13-slim
 
 ARG PKS_LSCRIPTS
 ARG PKS_CFG
@@ -27,7 +27,8 @@ RUN dpkg --add-architecture i386
 
 # Required packages for 32-bit 'pkserver' zlib1g:i386 libncurses5:i386 libstdc++5:i386
 # bbe is required for binary hacking
-RUN apt-get update && \
+RUN echo "deb http://deb.debian.org/debian bookworm main" >> /etc/apt/sources.list && \
+    apt-get update && \
     apt-get install --no-install-recommends -y bbe vim zlib1g:i386 libncurses5:i386 libstdc++5:i386 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
