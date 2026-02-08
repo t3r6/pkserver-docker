@@ -6,6 +6,7 @@
 - Added "-cfg" option like in the "Painkiller.exe" Windows binary to indicate a custom config.ini file.
 - Added "-lscripts" option like in the "Painkiller.exe" Windows binary to indicate a custom LScripts.pak.
 - Cfg.ServerMaps now update properly during the server initiation (Cfg:Load and Tweak:Load were removed from the binary). You no longer need to indicate a maplist in both Cfg.ServerMaps{Gamemode} (for example, Cfg.ServerMapsCTF) and Cfg.ServerMaps. Only indicating maplist in Cfg.ServerMaps{Gamemode} will be enough.
+- Disabled server CD check.
 
 ---
 
@@ -27,5 +28,5 @@ pkserver +interface 192.168.0.106 +private +port 3456 +map DM_Sacred -cfg conf12
 
 # Known bugs in the original **LScripts**
 
-- Cfg.StopMatchOnTeamQuit is "true" by default when no config.ini is provided (PK++ has this option "true" by default too). This option prevents a player to play a team game on the server without warmup.
+- Cfg.StopMatchOnTeamQuit "true" is bugged because when a single player on the server changes their state (player -> spectator, red team -> blue team) the game considers that there are 0 players during the state change and stops the match.
 - Cfg.PublicServer parameter does not work though you can use the "+private" command line instead to make your server private.
