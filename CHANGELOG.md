@@ -4,7 +4,7 @@
 - Fixed the "%s" symbols vulnerability that could crash the server.
 - "+map" (sets the initial map) and "+port" options now correcly override config.ini parameters.
 - Added "-cfg" option like in the "Painkiller.exe" Windows binary to indicate a custom config.ini file.
-- Added "-lscripts" option like in the "Painkiller.exe" Windows binary to indicate a custom LScripts.pak.
+- Added "-lscripts" option like in the "Painkiller.exe" Windows binary to indicate a custom LScripts.pak. It checks if the file name ends in ".pak" (lowercase).
 - Cfg.ServerMaps now update properly during the server initiation (Cfg:Load and Tweak:Load were removed from the binary). You no longer need to indicate a maplist in both Cfg.ServerMaps{Gamemode} (for example, Cfg.ServerMapsCTF) and Cfg.ServerMaps. Only indicating maplist in Cfg.ServerMaps{Gamemode} will be enough.
 - Disabled server CD check.
 

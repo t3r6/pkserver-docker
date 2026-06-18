@@ -248,11 +248,11 @@ docker run --rm --name ffa -itd -p 3455:3455/udp docker.io/painkillergameclassic
 ```
 
 ```
-docker run --rm --name duel -itd -e Cfg_ServerPort="3456" -p 3456:3456/udp docker.io/painkillergameclassic/pkserver:main
+docker run --rm --name duel -itd -e Cfg_GameMode="Duel" -e Cfg_ServerPort="3456" -p 3456:3456/udp docker.io/painkillergameclassic/pkserver:main
 ```
 
 ```
-docker run --rm --name ctf -itd -e Cfg_ServerPort="3457" -p 3457:3457/udp docker.io/painkillergameclassic/pkserver:main
+docker run --rm --name ctf -itd -e Cfg_GameMode="Capture The Flag" -e Cfg_ServerPort="3457" -p 3457:3457/udp docker.io/painkillergameclassic/pkserver:main
 ```
 
 Check the containers are running:
